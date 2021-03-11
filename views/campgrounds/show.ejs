@@ -1,13 +1,27 @@
 <% layout('layouts/boilerplate') %>
-<img src="<%= campground.image %> " alt="">
-<p><%= campground.description %> </p>
-<p><%= campground.price %> </p>
-<h1><%= foundCampground.title %> </h1>
-<h2><%= foundCampground.location %> </h2>
-<footer>
-    <a href="/campgrounds/<%= foundCampground.id %>/edit">Edit this campground</a>
-    <form action="/campgrounds/<%= foundCampground.id %>?_method=DELETE" method="post">
-        <button>Delete</button>
-    </form>
-    <a href="/campgrounds">Go back</a>
-</footer>
+<div class="row">
+    <div class="col-6 offset-3">
+        <div class="card mb-3">
+            <img src="<%= foundCampground.image %> " class="card-img-top" alt="">
+            <div class="card-body">
+              <h5 class="card-title"><%= foundCampground.title %> </h5>
+              <p class="card-text"><%= foundCampground.description %> </p>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item text-muted"><%= foundCampground.location %> </li>
+              <li class="list-group-item">&#8377 <%= foundCampground.price %>/night</li>
+            </ul>
+            <div class="card-body">
+                <a href="/campgrounds/<%= foundCampground.id %>/edit" class="card-link btn btn-warning">Edit</a>
+                <form class="d-inline" action="/campgrounds/<%= foundCampground.id %>?_method=DELETE" method="post">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+              <a href="/campgrounds" class="card-link">Go back</a>
+            </div>
+            <div class="card-footer text-muted">
+                2 days ago
+                <a href="/campgrounds">All campgrounds</a>
+            </div>
+        </div>
+    </div>
+</div>
