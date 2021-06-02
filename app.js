@@ -129,8 +129,13 @@ app.all('*', (req, res, next) => {
 
 // Basic error handler
 app.use((err, req, res, next) => {
-	const { statusCode = 500, message = "Something's wrong, I can feel it." } = err;
-	res.status(statusCode).send(message);
+	if (!err.message) {
+		err.message = 'Something went wrong';
+	}
+	if (!err.statusCode) {
+		err.statusCode = 500;
+	}
+	res.status(err.statusCode).render('error', { err });
 });
 
 //Server
