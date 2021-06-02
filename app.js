@@ -5,7 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
-const Joi = require('joi');
+const { campgroundSchema } = require('./schemas');
 
 // Require model(s)
 const Campground = require('./models/campground');
@@ -41,8 +41,19 @@ app.use(express.urlencoded({ extended: true }));
 // Method Override setup
 app.use(methodOverride('_method'));
 
+// Joi validation function
+const validateCampground = (req, res, next) => {
+	const { error } = campgroundSchema.validate(req.body);
+	if (error) {
+		const msg = error.details.map((el) => el.message).join(', ');
+		throw new ExpressError(400, msg);
+	} else {
+		next();
+	}
+};
+
 // Routing start*******************************************
-// Homepage routing
+// Homepage route
 app.get('/', (req, res) => {
 	res.render('home');
 });
@@ -74,21 +85,8 @@ app.get(
 // Create route
 app.post(
 	'/campgrounds',
+	validateCampground,
 	catchAsync(async (req, res, next) => {
-		const campgroundSchema = Joi.object({
-			campground: Joi.object({
-				title: Joi.string().required(),
-				location: Joi.string().required(),
-				description: Joi.string().required(),
-				image: Joi.string().required(),
-				price: Joi.number().required().min(0)
-			}).required()
-		});
-		const { error } = campgroundSchema.validate(req.body);
-		if (error) {
-			const msg = error.details.map((el) => el.message).join(', ');
-			throw new ExpressError(400, msg);
-		}
 		const { campground } = req.body;
 		const newCampground = new Campground({
 			title: campground.title,
@@ -115,6 +113,7 @@ app.get(
 // Update route
 app.patch(
 	'/campgrounds/:id',
+	validateCampground,
 	catchAsync(async (req, res) => {
 		const { id } = req.params;
 		const { campground } = req.body;
@@ -132,14 +131,14 @@ app.delete(
 		res.redirect('/campgrounds');
 	})
 );
-// Routing ends********************************************
 
 // 404 route
 app.all('*', (req, res, next) => {
 	next(new ExpressError(404, 'Page not found!'));
 });
+// Routing ends********************************************
 
-// Basic error handler
+// Error handler
 app.use((err, req, res, next) => {
 	if (!err.message) {
 		err.message = 'Something went wrong';
