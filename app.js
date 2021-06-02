@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 // Method Override setup
 app.use(methodOverride('_method'));
 
-// Routing
+// Routing start*******************************************
 // Homepage routing
 app.get('/', (req, res) => {
 	res.render('home');
@@ -60,17 +60,21 @@ app.get('/campgrounds/:id', async (req, res) => {
 });
 
 // Create route
-app.post('/campgrounds', async (req, res) => {
-	const { campground } = req.body;
-	const newCampground = new Campground({
-		title: campground.title,
-		location: campground.location,
-		description: campground.description,
-		image: campground.image,
-		price: campground.price
-	});
-	await newCampground.save();
-	res.redirect(`/campgrounds/${newCampground.id}`);
+app.post('/campgrounds', async (req, res, next) => {
+	try {
+		const { campground } = req.body;
+		const newCampground = new Campground({
+			title: campground.title,
+			location: campground.location,
+			description: campground.description,
+			image: campground.image,
+			price: campground.price
+		});
+		await newCampground.save();
+		res.redirect(`/campgrounds/${newCampground.id}`);
+	} catch (e) {
+		next(e);
+	}
 });
 
 // Edit route
@@ -93,6 +97,12 @@ app.delete('/campgrounds/:id', async (req, res) => {
 	const { id } = req.params;
 	await Campground.findByIdAndRemove(id);
 	res.redirect('/campgrounds');
+});
+// Routing ends********************************************
+
+// Basic error handler
+app.use((err, req, res, next) => {
+	res.send('Oh boy something went wrong!!!');
 });
 
 //Server
