@@ -9,7 +9,7 @@ const methodOverride = require('method-override');
 // Require model(s)
 const Campground = require('./models/campground');
 
-//Mongoose Setup
+// Mongoose Setup
 mongoose
 	.connect('mongodb://localhost:27017/yelp-camp', {
 		useNewUrlParser: true,
@@ -25,37 +25,41 @@ mongoose
 	});
 mongoose.set('useFindAndModify', false);
 
-//EJS setup
+// EJS setup
 app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 
-//Body parser setup
+// Body parser setup
 app.use(express.urlencoded({ extended: true }));
 
-//Method Override setup
+// Method Override setup
 app.use(methodOverride('_method'));
 
-//Basic routing
+// Routing
+// Homepage routing
 app.get('/', (req, res) => {
 	res.render('home');
 });
-//Index route
+
+// Index route
 app.get('/campgrounds', async (req, res) => {
 	const campgrounds = await Campground.find({});
 	res.render('campgrounds/index', { campgrounds });
 });
-//New route
+
+// New route
 app.get('/campgrounds/new', (req, res) => {
 	res.render('campgrounds/new');
 });
-//Show route
+// Show route
 app.get('/campgrounds/:id', async (req, res) => {
 	const { id } = req.params;
 	const foundCampground = await Campground.findById(id);
 	res.render('campgrounds/show', { foundCampground });
 });
-//Create route
+
+// Create route
 app.post('/campgrounds', async (req, res) => {
 	const { campground } = req.body;
 	const newCampground = new Campground({
@@ -68,20 +72,23 @@ app.post('/campgrounds', async (req, res) => {
 	await newCampground.save();
 	res.redirect(`/campgrounds/${newCampground.id}`);
 });
-//Edit route
+
+// Edit route
 app.get('/campgrounds/:id/edit', async (req, res) => {
 	const { id } = req.params;
 	const foundCampground = await Campground.findById(id);
 	res.render('campgrounds/edit', { foundCampground });
 });
-//Update route
+
+// Update route
 app.patch('/campgrounds/:id', async (req, res) => {
 	const { id } = req.params;
 	const { campground } = req.body;
 	await Campground.findByIdAndUpdate(id, campground);
 	res.redirect(`/campgrounds/${id}`);
 });
-//Delete route
+
+// Delete route
 app.delete('/campgrounds/:id', async (req, res) => {
 	const { id } = req.params;
 	await Campground.findByIdAndRemove(id);
