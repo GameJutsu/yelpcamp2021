@@ -9,6 +9,10 @@ const methodOverride = require('method-override');
 // Require model(s)
 const Campground = require('./models/campground');
 
+// Custom error class & catchAsync function
+const ExpressError = require('./utils/ExpressError');
+const catchAsync = require('./utils/catchAsync');
+
 // Mongoose Setup
 mongoose
 	.connect('mongodb://localhost:27017/yelp-camp', {
@@ -43,25 +47,33 @@ app.get('/', (req, res) => {
 });
 
 // Index route
-app.get('/campgrounds', async (req, res) => {
-	const campgrounds = await Campground.find({});
-	res.render('campgrounds/index', { campgrounds });
-});
+app.get(
+	'/campgrounds',
+	catchAsync(async (req, res) => {
+		const campgrounds = await Campground.find({});
+		res.render('campgrounds/index', { campgrounds });
+	})
+);
 
 // New route
 app.get('/campgrounds/new', (req, res) => {
 	res.render('campgrounds/new');
 });
+
 // Show route
-app.get('/campgrounds/:id', async (req, res) => {
-	const { id } = req.params;
-	const foundCampground = await Campground.findById(id);
-	res.render('campgrounds/show', { foundCampground });
-});
+app.get(
+	'/campgrounds/:id',
+	catchAsync(async (req, res) => {
+		const { id } = req.params;
+		const foundCampground = await Campground.findById(id);
+		res.render('campgrounds/show', { foundCampground });
+	})
+);
 
 // Create route
-app.post('/campgrounds', async (req, res, next) => {
-	try {
+app.post(
+	'/campgrounds',
+	catchAsync(async (req, res, next) => {
 		const { campground } = req.body;
 		const newCampground = new Campground({
 			title: campground.title,
@@ -72,32 +84,39 @@ app.post('/campgrounds', async (req, res, next) => {
 		});
 		await newCampground.save();
 		res.redirect(`/campgrounds/${newCampground.id}`);
-	} catch (e) {
-		next(e);
-	}
-});
+	})
+);
 
 // Edit route
-app.get('/campgrounds/:id/edit', async (req, res) => {
-	const { id } = req.params;
-	const foundCampground = await Campground.findById(id);
-	res.render('campgrounds/edit', { foundCampground });
-});
+app.get(
+	'/campgrounds/:id/edit',
+	catchAsync(async (req, res) => {
+		const { id } = req.params;
+		const foundCampground = await Campground.findById(id);
+		res.render('campgrounds/edit', { foundCampground });
+	})
+);
 
 // Update route
-app.patch('/campgrounds/:id', async (req, res) => {
-	const { id } = req.params;
-	const { campground } = req.body;
-	await Campground.findByIdAndUpdate(id, campground);
-	res.redirect(`/campgrounds/${id}`);
-});
+app.patch(
+	'/campgrounds/:id',
+	catchAsync(async (req, res) => {
+		const { id } = req.params;
+		const { campground } = req.body;
+		await Campground.findByIdAndUpdate(id, campground);
+		res.redirect(`/campgrounds/${id}`);
+	})
+);
 
 // Delete route
-app.delete('/campgrounds/:id', async (req, res) => {
-	const { id } = req.params;
-	await Campground.findByIdAndRemove(id);
-	res.redirect('/campgrounds');
-});
+app.delete(
+	'/campgrounds/:id',
+	catchAsync(async (req, res) => {
+		const { id } = req.params;
+		await Campground.findByIdAndRemove(id);
+		res.redirect('/campgrounds');
+	})
+);
 // Routing ends********************************************
 
 // Basic error handler
